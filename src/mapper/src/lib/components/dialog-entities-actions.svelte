@@ -37,11 +37,8 @@
 	let toggleDistanceWarningDialog = $state(false);
 	let showCommentsPopup: boolean = $state(false);
 
-	// use Map for quick lookups
-	let entityMap = $derived(new Map(entitiesStore.entitiesStatusList.map((entity) => [entity.entity_id, entity])));
-
 	const selectedEntityId = $derived(entitiesStore.selectedEntity || '');
-	const selectedEntity = $derived(entityMap.get(selectedEntityId));
+	const selectedEntity = $derived(entitiesStore.entityMap.get(selectedEntityId));
 	const selectedEntityCoordinate = $derived(entitiesStore.selectedEntityCoordinate);
 	const entityToNavigate = $derived(entitiesStore.entityToNavigate);
 	const entityComments = $derived(
@@ -70,7 +67,7 @@
 					entity_id: entityUuid,
 					status: 1,
 					// NOTE here we don't translate the field as English values are always saved as the Entity label
-					label: `Task ${selectedEntity?.task_id} Feature ${selectedEntity?.osmid}`,
+					label: `Task ${selectedEntity?.task_id} Feature ${selectedEntity?.osm_id}`,
 				});
 
 				if (taskStore.selectedTaskId && taskStore.selectedTaskState === TaskStatusEnum['UNLOCKED_TO_MAP']) {
@@ -157,7 +154,7 @@
 				></hot-icon>
 			</div>
 			<div class="section-container">
-				<p class="selected-title">{m['popup.feature']()} {selectedEntity?.osmid}</p>
+				<p class="selected-title">{m['popup.feature']()} {selectedEntity?.osm_id}</p>
 				<div class="section">
 					<div class="item">
 						<p class="label">{m['popup.task_id']()}</p>
@@ -269,7 +266,7 @@
 										entity_id: selectedEntity?.entity_id,
 										status: 1,
 										// NOTE here we don't translate the field as English values are always saved as the Entity label
-										label: `Task ${selectedEntity?.task_id} Feature ${selectedEntity?.osmid}`,
+										label: `Task ${selectedEntity?.task_id} Feature ${selectedEntity?.osm_id}`,
 									});
 									displayWebFormsDrawer = true;
 								}}
@@ -280,7 +277,7 @@
 											entity_id: selectedEntity?.entity_id,
 											status: 1,
 											// NOTE here we don't translate the field as English values are always saved as the Entity label
-											label: `Task ${selectedEntity?.task_id} Feature ${selectedEntity?.osmid}`,
+											label: `Task ${selectedEntity?.task_id} Feature ${selectedEntity?.osm_id}`,
 										});
 										displayWebFormsDrawer = true;
 									}
