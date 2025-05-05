@@ -1,0 +1,12 @@
+<map id="app.users.user_schemas.UserInviteIn" name="app.users.user_schemas.UserInviteIn">
+<area shape="rect" id="Node000001" title=" " alt="" coords="147,508,355,588"/>
+<area shape="rect" id="Node000002" href="$classapp_1_1db_1_1models_1_1DbUserInvite.html" title=" " alt="" coords="5,236,204,401"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="167,412,228,506,224,509,163,415"/>
+<area shape="rect" id="Node000003" title=" " alt="" coords="32,5,119,71"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="83,84,99,236,93,236,77,85"/>
+<area shape="rect" id="Node000004" title=" " alt="" coords="179,5,249,71"/>
+<area shape="poly" id="edge5_Node000001_Node000004" title=" " alt="" coords="229,70,235,94,250,204,257,313,257,491,251,491,252,314,245,204,230,95,224,72"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="180,53,149,70,134,82,123,96,109,125,101,156,95,220,90,219,95,155,104,123,118,93,131,78,146,66,178,48"/>
+<area shape="rect" id="Node000005" title=" " alt="" coords="317,286,399,351"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="346,353,279,494,274,492,341,350"/>
+</map>

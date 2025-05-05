@@ -1,0 +1,11 @@
+<map id="app.db.models.DbProjectTeam" name="app.db.models.DbProjectTeam">
+<area shape="rect" id="Node000001" title=" " alt="" coords="81,119,293,324"/>
+<area shape="rect" id="Node000003" href="$classapp_1_1projects_1_1project__schemas_1_1ProjectTeam.html" title=" " alt="" coords="5,372,168,452"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="128,338,110,373,105,370,124,335"/>
+<area shape="rect" id="Node000004" href="$classapp_1_1projects_1_1project__schemas_1_1ProjectTeamOne.html" title=" " alt="" coords="192,372,381,452"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="250,335,268,370,264,373,245,338"/>
+<area shape="rect" id="Node000002" title=" " alt="" coords="143,5,230,71"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="189,84,189,119,184,119,184,84"/>
+<area shape="rect" id="Node000005" href="$classapp_1_1projects_1_1project__schemas_1_1ProjectTeamIn.html" title=" " alt="" coords="199,500,374,580"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="289,466,289,500,284,500,284,466"/>
+</map>

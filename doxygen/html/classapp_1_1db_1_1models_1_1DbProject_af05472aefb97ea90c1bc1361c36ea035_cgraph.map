@@ -1,0 +1,15 @@
+<map id="app.db.models.DbProject.all" name="app.db.models.DbProject.all">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,77,211,102"/>
+<area shape="rect" id="Node000002" href="$classapp_1_1db_1_1models_1_1DbProject.html#abba92e3b588fdf724989ddc58a015f40" title=" " alt="" coords="259,5,448,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="157,74,262,46,263,52,159,79"/>
+<area shape="rect" id="Node000004" href="$classapp_1_1db_1_1models_1_1DbProject.html#ac733c671985e321bbcc5e68b7a57ab68" title=" " alt="" coords="259,69,448,109"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="211,87,245,87,245,92,211,92"/>
+<area shape="rect" id="Node000007" href="$classapp_1_1db_1_1models_1_1DbProject.html#a1868e7f416e1706c95c4d4c37e20545f" title=" " alt="" coords="259,133,448,173"/>
+<area shape="poly" id="edge6_Node000001_Node000007" title=" " alt="" coords="159,100,263,127,262,132,157,105"/>
+<area shape="rect" id="Node000003" href="$classapp_1_1db_1_1models_1_1DbProject.html#ab0cea93a9e4ebe6745ab65ef294cfdfa" title=" " alt="" coords="496,5,685,45"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="448,23,482,23,482,28,448,28"/>
+<area shape="rect" id="Node000005" href="$classapp_1_1db_1_1models_1_1DbProject.html#af146a81705b939cd9374e3f35736deed" title=" " alt="" coords="496,69,685,109"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="448,87,482,87,482,92,448,92"/>
+<area shape="rect" id="Node000006" href="$classapp_1_1db_1_1models_1_1DbProject.html#a63dc38ff241da47865df579cd125ea8d" title=" " alt="" coords="496,133,685,173"/>
+<area shape="poly" id="edge5_Node000004_Node000006" title=" " alt="" coords="429,107,504,127,502,132,428,112"/>
+</map>

@@ -1,0 +1,17 @@
+<map id="app.s3.s3_client" name="app.s3.s3_client">
+<area shape="rect" id="Node000001" title=" " alt="" coords="244,191,371,217"/>
+<area shape="rect" id="Node000002" href="$namespaceapp_1_1s3.html#af98a2260d6c414f30bcfab6fa94a3c89" title=" " alt="" coords="31,5,171,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="291,180,253,120,226,87,194,60,170,46,172,41,198,55,230,84,257,117,296,178"/>
+<area shape="rect" id="Node000003" href="$namespaceapp_1_1s3.html#ae6780aba333c971c29ad9b4ad5904d12" title=" " alt="" coords="5,70,196,95"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="283,182,244,145,195,110,164,98,166,93,197,106,248,141,287,178"/>
+<area shape="rect" id="Node000004" href="$namespaceapp_1_1s3.html#ace9ae23f25a624f9fac37cc368cb1c60" title=" " alt="" coords="12,120,189,160"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="252,190,165,163,167,158,253,185"/>
+<area shape="rect" id="Node000005" href="$namespaceapp_1_1s3.html#aecd3b665093c5d50d0d73a45cf704a67" title=" " alt="" coords="17,184,184,224"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="230,207,184,207,184,201,230,201"/>
+<area shape="rect" id="Node000006" href="$namespaceapp_1_1s3.html#a6b819c372b4be994968a2020de47b75e" title=" " alt="" coords="23,248,178,288"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="253,223,167,250,165,245,252,218"/>
+<area shape="rect" id="Node000007" href="$namespaceapp_1_1s3.html#a52c2d31f19c76698c2a7c6920c008a58" title=" " alt="" coords="23,312,178,352"/>
+<area shape="poly" id="edge6_Node000001_Node000007" title=" " alt="" coords="287,229,247,266,197,302,172,314,170,310,195,298,244,262,283,225"/>
+<area shape="rect" id="Node000008" href="$namespaceapp_1_1s3.html#a75a011ce2e94891b89f4dfde40dcef4e" title=" " alt="" coords="23,377,178,402"/>
+<area shape="poly" id="edge7_Node000001_Node000008" title=" " alt="" coords="298,231,260,299,232,335,198,366,173,379,171,374,194,362,228,332,256,296,293,228"/>
+</map>

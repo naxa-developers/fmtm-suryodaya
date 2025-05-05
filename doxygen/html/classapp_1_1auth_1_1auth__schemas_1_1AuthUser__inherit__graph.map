@@ -1,0 +1,7 @@
+<map id="app.auth.auth_schemas.AuthUser" name="app.auth.auth_schemas.AuthUser">
+<area shape="rect" id="Node000001" title=" " alt="" coords="6,352,239,477"/>
+<area shape="rect" id="Node000002" href="$classapp_1_1auth_1_1auth__schemas_1_1BaseUser.html" title=" " alt="" coords="5,119,240,304"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="125,318,125,352,120,352,120,318"/>
+<area shape="rect" id="Node000003" title=" " alt="" coords="79,5,166,71"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="125,85,125,119,120,119,120,85"/>
+</map>

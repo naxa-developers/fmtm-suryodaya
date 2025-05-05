@@ -1,0 +1,13 @@
+<map id="app.db.models.DbProject" name="app.db.models.DbProject">
+<area shape="rect" id="Node000001" title=" " alt="" coords="171,119,363,619"/>
+<area shape="rect" id="Node000003" href="$classapp_1_1projects_1_1project__schemas_1_1ProjectInBase.html" title=" " alt="" coords="78,667,257,1041"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="216,632,209,667,203,666,210,631"/>
+<area shape="rect" id="Node000006" href="$classapp_1_1projects_1_1project__schemas_1_1ProjectOut.html" title=" " alt="" coords="281,764,454,944"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="324,632,351,763,346,764,319,633"/>
+<area shape="rect" id="Node000002" title=" " alt="" coords="224,5,311,71"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="270,84,270,119,265,119,265,84"/>
+<area shape="rect" id="Node000004" href="$classapp_1_1projects_1_1project__schemas_1_1ProjectIn.html" title=" " alt="" coords="5,1099,148,1179"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="106,1055,92,1100,87,1098,101,1054"/>
+<area shape="rect" id="Node000005" href="$classapp_1_1projects_1_1project__schemas_1_1ProjectUpdate.html" title=" " alt="" coords="172,1089,347,1189"/>
+<area shape="poly" id="edge4_Node000003_Node000005" title=" " alt="" coords="235,1054,246,1088,241,1090,230,1055"/>
+</map>

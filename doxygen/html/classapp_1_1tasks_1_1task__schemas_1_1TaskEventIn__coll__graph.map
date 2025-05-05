@@ -1,0 +1,20 @@
+<map id="app.tasks.task_schemas.TaskEventIn" name="app.tasks.task_schemas.TaskEventIn">
+<area shape="rect" id="Node000001" title=" " alt="" coords="366,651,573,731"/>
+<area shape="rect" id="Node000002" href="$classapp_1_1db_1_1models_1_1DbTaskEvent.html" title=" " alt="" coords="221,516,419,601"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="380,609,426,648,423,652,377,613"/>
+<area shape="rect" id="Node000003" title=" " alt="" coords="78,210,165,275"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="142,287,180,364,217,429,261,490,281,514,277,518,257,494,212,432,175,367,137,289"/>
+<area shape="rect" id="Node000004" title=" " alt="" coords="5,210,53,275"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="34,275,40,323,53,381,77,440,94,466,115,490,157,519,206,538,204,543,155,524,112,494,90,470,73,442,48,382,34,324,28,276"/>
+<area shape="rect" id="Node000005" title=" " alt="" coords="510,210,591,275"/>
+<area shape="poly" id="edge9_Node000001_Node000005" title=" " alt="" coords="559,275,569,373,569,433,561,493,550,532,536,570,503,637,499,635,531,568,545,530,556,491,564,432,564,373,554,276"/>
+<area shape="poly" id="edge4_Node000002_Node000005" title=" " alt="" coords="535,277,508,329,481,390,473,419,471,444,466,468,450,494,434,509,431,506,446,490,461,466,466,443,468,418,476,388,504,327,531,274"/>
+<area shape="rect" id="Node000006" href="$classapp_1_1db_1_1enums_1_1TaskEvent.html" title=" " alt="" coords="189,120,365,365"/>
+<area shape="poly" id="edge5_Node000002_Node000006" title=" " alt="" coords="267,366,270,429,281,491,284,500,279,502,276,493,264,429,262,366"/>
+<area shape="rect" id="Node000007" title=" " alt="" coords="200,5,269,71"/>
+<area shape="poly" id="edge6_Node000006_Node000007" title=" " alt="" coords="247,83,254,119,249,120,241,85"/>
+<area shape="rect" id="Node000008" title=" " alt="" coords="293,5,344,71"/>
+<area shape="poly" id="edge7_Node000006_Node000008" title=" " alt="" coords="312,85,305,120,300,119,307,83"/>
+<area shape="rect" id="Node000009" title=" " alt="" coords="389,210,459,275"/>
+<area shape="poly" id="edge8_Node000002_Node000009" title=" " alt="" coords="416,277,380,367,365,390,351,438,335,500,330,499,345,436,360,388,375,364,411,275"/>
+</map>

@@ -1,0 +1,21 @@
+<map id="app.db.models.DbUser.create" name="app.db.models.DbUser.create">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,234,220,259"/>
+<area shape="rect" id="Node000002" href="$namespaceapp_1_1db_1_1models.html#a34f9b3e9cd8f79616e5b22b6b9b93142" title=" " alt="" coords="314,5,473,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="118,232,139,197,171,149,215,98,267,55,299,39,302,44,269,60,218,102,176,152,143,200,123,235"/>
+<area shape="rect" id="Node000003" href="$classapp_1_1db_1_1models_1_1DbProject.html#a85c8608bbc2d05801819a7b53304cc0b" title=" " alt="" coords="287,70,500,95"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="122,232,178,170,220,134,267,104,283,97,285,102,269,109,223,138,182,174,126,236"/>
+<area shape="rect" id="Node000004" href="$classapp_1_1db_1_1models_1_1DbTask.html#abe7641f31410b8086f627ed3bf74c5a3" title=" " alt="" coords="295,119,492,145"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="130,232,189,194,227,173,267,155,296,146,298,151,269,160,229,177,192,198,133,236"/>
+<area shape="rect" id="Node000005" href="$classapp_1_1db_1_1models_1_1DbBackgroundTask.html#ad0b298d3de02723961138d0dfa30845b" title=" " alt="" coords="285,169,502,209"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="175,231,281,209,282,215,176,237"/>
+<area shape="rect" id="Node000006" href="$classapp_1_1db_1_1models_1_1DbOrganisation.html#a564098033a613faa58012c6dc87cf758" title=" " alt="" coords="268,234,519,259"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="220,244,254,244,254,249,220,249"/>
+<area shape="rect" id="Node000007" href="$classapp_1_1db_1_1models_1_1DbUserInvite.html#a5af69f990441c847b3a3d4237e373971" title=" " alt="" coords="276,283,511,309"/>
+<area shape="poly" id="edge6_Node000001_Node000007" title=" " alt="" coords="186,257,307,278,306,283,185,262"/>
+<area shape="rect" id="Node000008" href="$classapp_1_1db_1_1models_1_1DbUser.html#ad90468c2315a882f6d7961cfbd345bab" title=" " alt="" coords="295,333,492,358"/>
+<area shape="poly" id="edge7_Node000001_Node000008" title=" " alt="" coords="137,257,196,287,269,317,303,327,301,332,267,323,194,292,135,262"/>
+<area shape="rect" id="Node000009" href="$classapp_1_1db_1_1models_1_1DbBasemap.html#a3a392fa37847a5acd85ef12e293a23ca" title=" " alt="" coords="279,382,508,407"/>
+<area shape="poly" id="edge8_Node000001_Node000009" title=" " alt="" coords="128,257,185,311,225,342,269,367,291,376,289,381,267,372,222,346,182,315,124,261"/>
+<area shape="rect" id="Node000010" href="$classapp_1_1db_1_1models_1_1DbProjectTeam.html#a04310c8ff2d23f058c179b601f4bf0a6" title=" " alt="" coords="269,431,517,457"/>
+<area shape="poly" id="edge9_Node000001_Node000010" title=" " alt="" coords="124,258,145,291,177,334,220,379,269,416,285,424,283,429,267,421,216,383,173,338,140,294,119,261"/>
+</map>

@@ -1,0 +1,11 @@
+<map id="app.projects.project_schemas.ProjectTeamOne" name="app.projects.project_schemas.ProjectTeamOne">
+<area shape="rect" id="Node000001" title=" " alt="" coords="46,348,235,428"/>
+<area shape="rect" id="Node000002" href="$classapp_1_1db_1_1models_1_1DbProjectTeam.html" title=" " alt="" coords="35,133,247,299"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="143,313,143,348,138,348,138,313"/>
+<area shape="rect" id="Node000003" title=" " alt="" coords="5,5,92,71"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="74,82,100,132,96,134,69,84"/>
+<area shape="rect" id="Node000004" title=" " alt="" coords="117,5,165,71"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="143,71,143,117,138,117,138,71"/>
+<area shape="rect" id="Node000005" title=" " alt="" coords="206,5,275,71"/>
+<area shape="poly" id="edge4_Node000002_Node000005" title=" " alt="" coords="231,72,214,111,208,120,204,118,209,108,227,70"/>
+</map>
