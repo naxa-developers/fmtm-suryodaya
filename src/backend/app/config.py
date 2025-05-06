@@ -163,7 +163,7 @@ class Settings(BaseSettings):
     DEFAULT_ORG_URL: Optional[str] = "https://naxa.com.np"
     DEFAULT_ORG_EMAIL: Optional[str] = "adhikarisujan.naxa@gmail.com"
     DEFAULT_ORG_LOGO_URL: Optional[str] = (
-        "https://raw.githubusercontent.com/hotosm/fmtm/refs/heads/development/src/frontend/public/naxa.png"
+        "https://raw.githubusercontent.com/naxa-developers/fmtm-suryodaya/refs/heads/staging/src/frontend/public/naxa.png"
     )
 
     EXTRA_CORS_ORIGINS: Optional[str | list[str]] = None
