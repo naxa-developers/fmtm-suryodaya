@@ -159,11 +159,11 @@ class Settings(BaseSettings):
     FMTM_DOMAIN: str
     FMTM_DEV_PORT: Optional[str] = "7050"
 
-    DEFAULT_ORG_NAME: Optional[str] = "HOTOSM"
-    DEFAULT_ORG_URL: Optional[str] = "https://hotosm.org"
-    DEFAULT_ORG_EMAIL: Optional[str] = "syadmin@hotosm.org"
+    DEFAULT_ORG_NAME: Optional[str] = "NAXA"
+    DEFAULT_ORG_URL: Optional[str] = "https://naxa.com.np"
+    DEFAULT_ORG_EMAIL: Optional[str] = "adhikarisujan.naxa@gmail.com"
     DEFAULT_ORG_LOGO_URL: Optional[str] = (
-        "https://raw.githubusercontent.com/hotosm/fmtm/refs/heads/development/src/frontend/public/hot-org-logo.png"
+        "https://raw.githubusercontent.com/hotosm/fmtm/refs/heads/development/src/frontend/public/naxa.png"
     )
 
     EXTRA_CORS_ORIGINS: Optional[str | list[str]] = None
