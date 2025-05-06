@@ -100,7 +100,7 @@ async def init_admin_org(db: Connection) -> None:
             except aiohttp.ClientError as e:
                 log.debug(f"Failed to fetch logo from {logo_url}: {e}")
 
-    hotosm_org = await DbOrganisation.create(
+    naxa_org = await DbOrganisation.create(
         db,
         org_in,
         admin_user.sub,
@@ -109,8 +109,8 @@ async def init_admin_org(db: Connection) -> None:
     )
 
     # Make admin user manager of HOTOSM
-    if hotosm_org:
-        await DbOrganisationManagers.create(db, hotosm_org.id, admin_user.sub)
+    if naxa_org:
+        await DbOrganisationManagers.create(db, naxa_org.id, admin_user.sub)
 
 
 async def get_my_organisations(
