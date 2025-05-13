@@ -11,7 +11,6 @@
 	import { getTaskStore } from '$store/tasks.svelte.ts';
 	import { mapTask } from '$lib/db/events';
 
-	type statusType = 'READY' | 'OPENED_IN_ODK' | 'SURVEY_SUBMITTED' | 'MARKED_BAD' | 'VALIDATED';
 	type Props = {
 		isTaskActionModalOpen: boolean;
 		toggleTaskActionModal: (value: boolean) => void;
@@ -37,11 +36,7 @@
 	let toggleDistanceWarningDialog = $state(false);
 	let showCommentsPopup: boolean = $state(false);
 
-	// use Map for quick lookups
-	let entityMap = $derived(new Map(entitiesStore.entitiesStatusList.map((entity) => [entity.entity_id, entity])));
-
-	const selectedEntityId = $derived(entitiesStore.selectedEntity || '');
-	const selectedEntity = $derived(entityMap.get(selectedEntityId));
+	const selectedEntity = $derived(entitiesStore.selectedEntity);
 	const selectedEntityCoordinate = $derived(entitiesStore.selectedEntityCoordinate);
 	const entityToNavigate = $derived(entitiesStore.entityToNavigate);
 	const entityComments = $derived(
@@ -50,7 +45,7 @@
 				(event) =>
 					event.event === 'COMMENT' &&
 					event.comment?.startsWith('#submissionId:uuid:') &&
-					`#featureId:${entitiesStore.selectedEntity}` === event.comment?.split(' ')?.[1],
+					`#featureId:${selectedEntity?.entity_id}` === event.comment?.split(' ')?.[1],
 			)
 			?.reverse(),
 	);
@@ -70,7 +65,7 @@
 					entity_id: entityUuid,
 					status: 1,
 					// NOTE here we don't translate the field as English values are always saved as the Entity label
-					label: `Task ${selectedEntity?.task_id} Feature ${selectedEntity?.osmid}`,
+					label: `Task ${selectedEntity?.task_id} Feature ${selectedEntity?.osm_id}`,
 				});
 
 				if (taskStore.selectedTaskId && taskStore.selectedTaskState === TaskStatusEnum['UNLOCKED_TO_MAP']) {
@@ -146,10 +141,16 @@
 			<div class="icon">
 				<hot-icon
 					name="close"
-					onclick={() => toggleTaskActionModal(false)}
+					onclick={() => {
+						toggleTaskActionModal(false);
+						entitiesStore.setSelectedEntityId(null);
+						entitiesStore.setSelectedEntityCoordinate(null);
+					}}
 					onkeydown={(e: KeyboardEvent) => {
 						if (e.key === 'Enter') {
 							toggleTaskActionModal(false);
+							entitiesStore.setSelectedEntityId(null);
+							entitiesStore.setSelectedEntityCoordinate(null);
 						}
 					}}
 					role="button"
@@ -157,7 +158,7 @@
 				></hot-icon>
 			</div>
 			<div class="section-container">
-				<p class="selected-title">{m['popup.feature']()} {selectedEntity?.osmid}</p>
+				<p class="selected-title">{m['popup.feature']()} {selectedEntity?.osm_id}</p>
 				<div class="section">
 					<div class="item">
 						<p class="label">{m['popup.task_id']()}</p>
@@ -269,7 +270,7 @@
 										entity_id: selectedEntity?.entity_id,
 										status: 1,
 										// NOTE here we don't translate the field as English values are always saved as the Entity label
-										label: `Task ${selectedEntity?.task_id} Feature ${selectedEntity?.osmid}`,
+										label: `Task ${selectedEntity?.task_id} Feature ${selectedEntity?.osm_id}`,
 									});
 									displayWebFormsDrawer = true;
 								}}
@@ -280,7 +281,7 @@
 											entity_id: selectedEntity?.entity_id,
 											status: 1,
 											// NOTE here we don't translate the field as English values are always saved as the Entity label
-											label: `Task ${selectedEntity?.task_id} Feature ${selectedEntity?.osmid}`,
+											label: `Task ${selectedEntity?.task_id} Feature ${selectedEntity?.osm_id}`,
 										});
 										displayWebFormsDrawer = true;
 									}
