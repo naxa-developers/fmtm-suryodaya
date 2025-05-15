@@ -3,26 +3,92 @@
 	import '@hotosm/ui/dist/hotosm-ui';
 
 	import { onMount } from 'svelte';
+	import { online } from 'svelte/reactivity/window';
+	import { error } from '@sveltejs/kit';
 	import type { PageProps } from './$types';
 	import { pwaInfo } from 'virtual:pwa-info';
+	import { useRegisterSW } from 'virtual:pwa-register/svelte';
+	import type { RegisterSWOptions } from 'vite-plugin-pwa/types';
 
-	import { getDbOnce } from '$lib/db/pglite';
-	import { getCommonStore } from '$store/common.svelte.ts';
+	import { getCommonStore, getAlertStore } from '$store/common.svelte.ts';
+	import { getLoginStore } from '$store/login.svelte.ts';
+	import { refreshCookies, getUserDetailsFromApi } from '$lib/api/login';
 	import Toast from '$lib/components/toast.svelte';
 	import Header from '$lib/components/header.svelte';
+	import { m } from '$translations/messages.js';
 
 	let { data, children }: PageProps = $props();
 
 	const commonStore = getCommonStore();
+	const loginStore = getLoginStore();
+	const alertStore = getAlertStore();
+	commonStore.setConfig(data.config);
+
+	let dbPromise = data.dbPromise;
+	let lastOnlineStatus: boolean | null = $state(null);
+	let loginDebounce: ReturnType<typeof setTimeout> | null = $state(null);
 
 	// Required for PWA to work with svelte
 	const webManifestLink = $derived(pwaInfo ? pwaInfo.webManifest.linkTag : '');
-	commonStore.setConfig(data.config);
+    const { offlineReady, needRefresh, updateServiceWorker, offline }: RegisterSWOptions = useRegisterSW({
+        onRegistered(swr: any) {
+            console.log(`SW registered: ${swr}`);
+        },
+        onRegisterError(error: any) {
+            console.log('SW registration error', error);
+        },
+        onOfflineReady() {
+            console.log('SW ready for offline')
+			alertStore.setAlert({ message: m['offline.ready_offline'](), variant: 'default', duration: 2000 });
+        },
+    });
 
-	// Start DB loading immediately, outside of onMount
-	const dbPromise = getDbOnce().then((db) => {
-		commonStore.setDb(db);
-		return db;
+	async function refreshCookiesAndLogin() {
+		try {
+			/*
+				Login + user details
+			*/
+			if (online.current) {
+				// Online: always go through API and refresh cookies
+				let apiUser = await refreshCookies(fetch);
+				loginStore.setRefreshCookieResponse(apiUser);
+
+				// svcfmtm is the default 'temp' user, to still allow mapping without login
+				if (apiUser?.username !== 'svcfmtm') {
+					// Call /auth/me to populate the user details in the header
+					apiUser = await getUserDetailsFromApi(fetch);
+
+					if (!apiUser) {
+						loginStore.signOut();
+						throw error(401, { message: `You must log in first` });
+					} else {
+						loginStore.setAuthDetails(apiUser);
+					}
+				}
+			}
+		} catch (error) {
+			console.warn('Error getting user login details')
+		}
+	}
+
+	// Attempt cookie refresh / login once connectivity restored
+	$effect(() => {
+		const isOnline = online.current;
+
+		// Prevent running unnecessarily
+		if (isOnline === lastOnlineStatus) return;
+		lastOnlineStatus = isOnline;
+
+		if (loginDebounce) {
+			clearTimeout(loginDebounce);
+			loginDebounce = null;
+		}
+
+		loginDebounce = setTimeout(() => {
+			if (isOnline) {
+				refreshCookiesAndLogin();
+			}
+		}, 200);
 	});
 
 	onMount(async () => {
@@ -41,8 +107,8 @@
 </svelte:head>
 
 <main class="flex flex-col h-screen overflow-hidden font-barlow">
-	<Header />
-	<Toast />
+	<Header></Header>
+	<Toast></Toast>
 
 	{#await dbPromise}
 		<div class="spinner-wrapper">
@@ -50,5 +116,7 @@
 		</div>
 	{:then db}
 		{@render children?.({ data, db })}
+	{:catch error}
+		<p class="text-red-500 p-4">Error loading PGLite: {error.message}</p>
 	{/await}
 </main>

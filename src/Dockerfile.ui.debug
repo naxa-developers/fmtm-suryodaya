@@ -7,7 +7,7 @@ RUN set -ex \
     && rm -rf /var/lib/apt/lists/*
 WORKDIR /app
 # The migrations go in a separate dir to prevent overwrite on /app bind mount
-COPY backend/migrations /migrations
+COPY backend/migrations /backend/migrations
 # NOTE 'code' is an additional_context for the build
 # NOTE we need it to be dynamic for 'frontend' and 'mapper' options
 COPY --from=code ./package.json ./pnpm-lock.yaml ./
@@ -18,11 +18,11 @@ RUN npm install -g corepack@0.31.0
 # FIXME delete this line after fixed upstream
 RUN corepack enable && corepack install
 RUN pnpm install
-ENTRYPOINT ["pnpm", "run", "dev"]
+CMD ["pnpm", "run", "dev"]
 
 
 # Test code for initialising PGLite db and creating tar dump
 # FROM build AS init-db
 # COPY --from=code ./src/lib/db/init.js ./src/lib/db/init.js
 # RUN pnpm run init-db
-# RUN cp pgdata.tar.gz /migrations/init/
+# RUN cp pgdata.tar.gz /backend/migrations/init/

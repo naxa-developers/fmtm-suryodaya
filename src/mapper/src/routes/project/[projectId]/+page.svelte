@@ -4,6 +4,7 @@
 	import './page.css';
 	import type { PageData } from './$types';
 	import { onMount, onDestroy } from 'svelte';
+	import { online } from 'svelte/reactivity/window';
 	import type { ShapeStream } from '@electric-sql/client';
 	import { polygon } from '@turf/helpers';
 	import { buffer } from '@turf/buffer';
@@ -16,7 +17,7 @@
 	import BottomSheet from '$lib/components/bottom-sheet.svelte';
 	import MapComponent from '$lib/components/map/main.svelte';
 	import QRCodeComponent from '$lib/components/qrcode.svelte';
-	import BasemapComponent from '$lib/components/offline/basemaps.svelte';
+	import OfflineComponent from '$lib/components/offline/index.svelte';
 	import DialogTaskActions from '$lib/components/dialog-task-actions.svelte';
 	import DialogEntityActions from '$lib/components/dialog-entities-actions.svelte';
 	import OdkWebFormsWrapper from '$lib/components/forms/wrapper.svelte';
@@ -29,13 +30,15 @@
 	import { getProjectSetupStepStore, getCommonStore, getAlertStore } from '$store/common.svelte.ts';
 	import { projectSetupStep as projectSetupStepEnum } from '$constants/enums.ts';
 	import Editor from '$lib/components/editor/editor.svelte';
+	import { readFileFromOPFS } from '$lib/fs/opfs';
+	import { loadOfflineExtract, writeOfflineExtract } from '$lib/map/extracts';
 
 	interface Props {
 		data: PageData;
 	}
 
 	const { data }: Props = $props();
-	const { project, projectId } = data;
+	const { project, projectId, db } = data;
 
 	let webFormsRef: HTMLElement | undefined = $state();
 	let displayWebFormsDrawer = $state(false);
@@ -47,21 +50,24 @@
 	let isDrawEnabled: boolean = $state(false);
 	let latestEventTime: string = $state('');
 	let isGeometryCreationLoading: boolean = $state(false);
+	let timeout: NodeJS.Timeout | undefined = $state();
 
 	const taskStore = getTaskStore();
 	const entitiesStore = getEntitiesStatusStore();
 	const newBadGeomStore = getNewBadGeomStore();
 	const commonStore = getCommonStore();
-	// Destructure and get the db variable from commonStore
-	const { db } = commonStore;
 	const alertStore = getAlertStore();
 
 	let taskEventStream: ShapeStream | undefined;
 	let entityStatusStream: ShapeStream | undefined;
 	let newBadGeomStream: ShapeStream | undefined;
+	let lastOnlineStatus: boolean | null = $state(null);
+	let subscribeDebounce: ReturnType<typeof setTimeout> | null = $state(null);
 
 	const latestEvent = $derived(taskStore.latestEvent);
 	const commentMention = $derived(taskStore.commentMention);
+	// Make db accessible via store
+	commonStore.setDb(db);
 	commonStore.setUseOdkCollectOverride(project.use_odk_collect);
 
 	// Update the geojson task states when a new event is added
@@ -114,22 +120,87 @@
 		tabGroup.show('map');
 	}
 
-	onMount(async () => {
+	// if the content-length is less than 2MB, download
+	const storeFgbExtractOffline = async () => {
+		const response = await fetch(project.data_extract_url, {
+			method: 'HEAD',
+		});
+		const contentLength = response.headers.get('Content-Length');
+		if (!contentLength) return;
+
+		const maxAutoDownloadSize = 2 * 1024 * 1024; // 2MB
+		const fileSize = parseInt(contentLength, 10);
+		if (fileSize <= maxAutoDownloadSize) {
+			writeOfflineExtract(projectId, project.data_extract_url);
+		}
+	};
+
+	async function subscribeToAllStreams() {
+		// Ensure unsubscribed first
+		unsubscribeFromAllStreams();
+
 		taskEventStream = await taskStore.getTaskEventStream(db, projectId);
 		entityStatusStream = await entitiesStore.getEntityStatusStream(db, projectId);
 		newBadGeomStream = await newBadGeomStore.getNewBadGeomStream(db, projectId);
+	}
+
+	onMount(async () => {
+		await subscribeToAllStreams();
 
 		// Note we need this for now, as the task outlines are from API, while task
 		// events are from pglite / sync. We pass through the task outlines.
-		await taskStore.appendTaskStatesToFeatcol(db, projectId, project.tasks);
+		taskStore.appendTaskStatesToFeatcol(db, projectId, project.tasks);
+
+		// check if Fgb extract exists in OPFS
+		const offlineExtractFile = await readFileFromOPFS(`${projectId}/extract.fgb`);
+		if (offlineExtractFile) {
+			loadOfflineExtract(projectId);
+			return;
+		}
+
+		// 30s delay to defer saving data until after initial page load
+		timeout = setTimeout(() => {
+			storeFgbExtractOffline();
+		}, 30000);
 	});
 
-	onDestroy(() => {
+	async function unsubscribeFromAllStreams() {
 		taskStore.unsubscribeEventStream();
 		entitiesStore.unsubscribeEntitiesStream();
 		newBadGeomStore.unsubscribeNewBadGeomStream();
+	}
+
+	onDestroy(() => {
+		unsubscribeFromAllStreams();
 
 		taskStore.clearTaskStates();
+		entitiesStore.setFgbOpfsUrl('');
+
+		if (timeout) clearTimeout(timeout);
+	});
+
+	// Subscribe / unsubscribe from streams based on connectivity
+	// note: the effect rune can't accept async, but this is fine
+	// note: we also need to debounce this to prevent infinite loop
+	$effect(() => {
+		const isOnline = online.current;
+
+		// Prevent running unnecessarily
+		if (isOnline === lastOnlineStatus) return;
+		lastOnlineStatus = isOnline;
+
+		if (subscribeDebounce) {
+			clearTimeout(subscribeDebounce);
+			subscribeDebounce = null;
+		}
+
+		subscribeDebounce = setTimeout(() => {
+			if (isOnline) {
+				subscribeToAllStreams();
+			} else {
+				unsubscribeFromAllStreams();
+			}
+		}, 200);
 	});
 
 	const projectSetupStepStore = getProjectSetupStepStore();
@@ -286,7 +357,7 @@
 			openedActionModal = value;
 		}}
 		projectOutlineCoords={project.outline.coordinates}
-		projectId={projectId}
+		{projectId}
 		entitiesUrl={project.data_extract_url}
 		primaryGeomType={project.primary_geom_type}
 		draw={isDrawEnabled}
@@ -365,7 +436,7 @@
 				<More projectData={project} zoomToTask={(taskId) => zoomToTask(taskId)}></More>
 			{/if}
 			{#if commonStore.selectedTab === 'offline'}
-				<BasemapComponent projectId={project.id}></BasemapComponent>
+				<OfflineComponent projectId={project.id} {project} />
 			{/if}
 			{#if commonStore.selectedTab === 'qrcode'}
 				<QRCodeComponent class="map-qr" {infoDialogRef} projectName={project.name} projectOdkToken={project.odk_token}>
@@ -427,19 +498,12 @@
 			<sl-tab slot="nav" panel="map">
 				<hot-icon name="map"></hot-icon>
 			</sl-tab>
-			{#if !commonStore.enableWebforms}
-				<sl-tab slot="nav" panel="offline">
-					<hot-icon name="wifi-off"></hot-icon>
-				</sl-tab>
-				<sl-tab slot="nav" panel="qrcode">
-					<hot-icon name="qr-code"></hot-icon>
-				</sl-tab>
-			{/if}
-			{#if commonStore.enableWebforms}
-				<sl-tab slot="nav" panel="instructions">
-					<hot-icon name="description"></hot-icon>
-				</sl-tab>
-			{/if}
+			<sl-tab slot="nav" panel="offline">
+				<hot-icon name="wifi-off"></hot-icon>
+			</sl-tab>
+			<sl-tab slot="nav" panel="qrcode">
+				<hot-icon name="qr-code"></hot-icon>
+			</sl-tab>
 			<sl-tab slot="nav" panel="events">
 				<hot-icon name="three-dots"></hot-icon>
 			</sl-tab>
@@ -449,7 +513,7 @@
 	<OdkWebFormsWrapper
 		bind:webFormsRef
 		bind:display={displayWebFormsDrawer}
-		projectId={projectId}
+		{projectId}
 		entityId={entitiesStore.selectedEntityId || undefined}
 		taskId={taskStore.selectedTaskIndex || undefined}
 	/>

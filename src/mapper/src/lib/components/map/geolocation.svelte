@@ -51,7 +51,8 @@
 					sensitiveAltRoutelineLayers: ['maplibre-gl-directions-alt-routeline'],
 				});
 				directions.interactive = false;
-				map.addControl(new LoadingIndicatorControl(directions));
+				const loadingIndicator = new LoadingIndicatorControl(directions);
+				map.addControl(loadingIndicator);
 				directions.clear();
 
 				directions.on('fetchroutesend', (ev) => {
@@ -182,7 +183,7 @@
 				// firefox & safari doesn't support device orientation sensor
 				alertStore.setAlert({
 					variant: 'warning',
-					message: "Unable to handle device orientation. Your browser doesn't support device orientation sensors.",
+					message: m['map.no_orientation_sensors'](),
 				});
 			} else {
 				// See the API specification at: https://w3c.github.io/orientation-sensor
@@ -284,7 +285,7 @@
 {#if entitiesStore.toggleGeolocation && entityToNavigate}
 	<div class="geolocation-exit">
 		<div class="content">
-			<p class="distance">{m['geolocation.distance']()}: {entityDistance}m</p>
+			<p class="distance">{m['map.distance']()}: {entityDistance}m</p>
 			<sl-button
 				onclick={exitNavigationMode}
 				onkeydown={(e: KeyboardEvent) => {
