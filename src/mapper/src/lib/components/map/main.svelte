@@ -64,7 +64,8 @@
 		primaryGeomType: MapGeomTypes;
 		draw?: boolean;
 		drawGeomType: MapGeomTypes;
-		handleDrawnGeom?: ((drawInstance: any, geojson: GeoJSONGeometry) => void) | null;
+		syncButtonTrigger: (() => void);
+		handleDrawnGeom?: ((drawInstance: any, geojson: GeoJSONGeometry) => void);
 	}
 
 	let {
@@ -76,6 +77,7 @@
 		primaryGeomType,
 		draw = false,
 		drawGeomType,
+		syncButtonTrigger,
 		handleDrawnGeom,
 	}: Props = $props();
 
@@ -204,9 +206,14 @@
 
 		if (clickedEntityFeature && clickedEntityFeature?.length > 0 && clickedFeatures?.length < 2) {
 			// if clicked coordinate contains uploaded entity only
-			const entityCentroid = centroid(clickedEntityFeature[0].geometry);
+			const entityGeometry = clickedEntityFeature[0].geometry;
+			const entityCentroid = centroid(entityGeometry);
 			const clickedEntityId = clickedEntityFeature[0]?.properties?.entity_id;
 			entitiesStore.setSelectedEntityId(clickedEntityId);
+			entitiesStore.setSelectedEntityGeometry({
+				entityId: clickedEntityId,
+				geometry: entityGeometry,
+			});
 			entitiesStore.setSelectedEntityCoordinate({
 				entityId: clickedEntityId,
 				coordinate: entityCentroid?.geometry?.coordinates,
@@ -419,21 +426,27 @@
 		</ControlGroup></Control
 	>
 	<Control class="control" position="bottom-right">
+		{#if commonStore.offlineSyncPercentComplete}
+			<div class="offline-sync-percent">{commonStore.offlineSyncPercentComplete}%</div>
+		{/if}
 		<div class="content">
 			<sl-icon-button
 				name="arrow-repeat"
-				label="Settings"
-				disabled={entitiesStore.syncEntityStatusManuallyLoading}
-				class={`sync-button ${entitiesStore.syncEntityStatusManuallyLoading && 'animate-spin'}`}
-				onclick={async () => await entitiesStore.syncEntityStatusManually(db, projectId)}
+				label="Sync"
+				disabled={entitiesStore.syncEntityStatusManuallyLoading || commonStore.offlineDataIsSyncing}
+				class={`sync-button ${
+					(entitiesStore.syncEntityStatusManuallyLoading || commonStore.offlineDataIsSyncing) && 'animate-spin'
+				}`}
+				onclick={async () => syncButtonTrigger()}
 				onkeydown={async (e: KeyboardEvent) => {
-					e.key === 'Enter' && (await entitiesStore.syncEntityStatusManually(db, projectId));
+					e.key === 'Enter' && (syncButtonTrigger());
 				}}
 				role="button"
 				tabindex="0"
 			></sl-icon-button>
 		</div>
 		<div
+			class="layer-switcher"
 			aria-label="layer switcher"
 			onclick={() => {
 				selectedControl = 'layer-switcher';
@@ -539,7 +552,7 @@
 			extent={taskStore.selectedTaskGeom}
 			extractGeomCols={true}
 			promoteId="id"
-			processGeojson={(geojsonData) => entitiesStore.addStatusToGeojsonProperty(geojsonData, '')}
+			processGeojson={(geojsonData) => entitiesStore.addStatusToGeojsonProperty(geojsonData)}
 			geojsonUpdateDependency={[entitiesStore.entitiesList]}
 		>
 			{#if primaryGeomType === MapGeomTypes.POLYGON}
@@ -644,7 +657,7 @@
 			/>
 		{/if}
 	</GeoJSON>
-	<GeoJSON id="new-geoms" data={entitiesStore.addStatusToGeojsonProperty(entitiesStore.newGeomFeatcol, 'new')}>
+	<GeoJSON id="new-geoms" data={entitiesStore.addStatusToGeojsonProperty(entitiesStore.newGeomFeatcol)}>
 		{#if drawGeomType === MapGeomTypes.POLYGON}
 			<FillLayer
 				id="new-entity-polygon-layer"
@@ -658,11 +671,7 @@
 						cssValue('--entity-ready'),
 						'OPENED_IN_ODK',
 						cssValue('--entity-opened-in-odk'),
-						// For mapped new geometries, we have NEW_GEOM status instead,
-						// but for legacy projects we also check SURVEY_SUBMITTED
 						'SURVEY_SUBMITTED',
-						cssValue('--entity-survey-submitted'),
-						'NEW_GEOM',
 						cssValue('--entity-survey-submitted'),
 						'VALIDATED',
 						cssValue('--entity-validated'),
@@ -704,11 +713,7 @@
 						'MAP_PIN_GREY',
 						'OPENED_IN_ODK',
 						'MAP_PIN_YELLOW',
-						// For mapped new geometries, we have NEW_GEOM status instead,
-						// but for legacy projects we also check SURVEY_SUBMITTED
 						'SURVEY_SUBMITTED',
-						'MAP_PIN_GREEN',
-						'NEW_GEOM',
 						'MAP_PIN_GREEN',
 						'VALIDATED',
 						'MAP_PIN_BLUE',
