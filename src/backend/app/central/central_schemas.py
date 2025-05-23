@@ -20,9 +20,10 @@
 import re
 from dataclasses import dataclass
 from datetime import datetime
-from typing import Optional, Self, TypedDict
+from typing import Optional, Self, TypedDict, List
 
 from geojson_pydantic import Feature, FeatureCollection
+from geojson_pydantic.geometries import Point
 from loguru import logger as log
 from pydantic import BaseModel, Field, ValidationInfo, computed_field
 from pydantic.functional_validators import field_validator, model_validator
@@ -207,16 +208,42 @@ class EntityProperties(BaseModel):
         return self.updatedAt
 
 
-class EntityFeature(Feature):
-    """ODK Entities as a GeoJSON Feature."""
+class SafePoint(Point):
+    """A Point geometry that ensures valid coordinates."""
 
+    @field_validator("coordinates", mode="before")
+    @classmethod
+    def validate_coordinates(cls, v):
+        if not isinstance(v, (list, tuple)) or len(v) < 2:
+            raise ValueError("Invalid coordinates for Point. Must be at least [lon, lat].")
+        lon, lat = v[0], v[1]
+        if not isinstance(lon, (int, float)) or not isinstance(lat, (int, float)):
+            raise ValueError("Coordinates must be numeric.")
+        return v[:3]  # allow optional altitude
+
+
+class EntityFeature(Feature):
+    """A single ODK Entity as a GeoJSON Feature."""
+
+    geometry: Optional[SafePoint]  # Allow null if invalid
     properties: EntityProperties
+
+    @model_validator(mode="before")
+    @classmethod
+    def sanitize_invalid_geometry(cls, values):
+        geom = values.get("geometry")
+        coords = geom.get("coordinates") if geom else None
+
+        if not coords or not isinstance(coords, (list, tuple)) or len(coords) < 2:
+            # Remove invalid geometry
+            values["geometry"] = None
+        return values
 
 
 class EntityFeatureCollection(FeatureCollection):
     """ODK Entity Features wrapped in a FeatureCollection."""
 
-    features: list[EntityFeature]
+    features: List[EntityFeature]
 
 
 class EntityOsmID(BaseModel):
