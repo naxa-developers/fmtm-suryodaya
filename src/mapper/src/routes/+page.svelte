@@ -1,8 +1,9 @@
 <script lang="ts">
 	import '$styles/page.css';
 	import type { PageData } from './$types';
-	import { onMount } from 'svelte';
+	import { onMount, onDestroy } from 'svelte';
 	import { online } from 'svelte/reactivity/window';
+	import type { PGlite } from '@electric-sql/pglite';
 	import type { SlInputEvent } from '@shoelace-style/shoelace';
 
 	import { goto } from '$app/navigation';
@@ -16,14 +17,10 @@
 		data: PageData;
 	}
 
+	let db: PGlite | undefined;
 	const { data }: Props = $props();
-	const { db } = data;
-
 	const commonStore = getCommonStore();
 	const projectStore = getProjectStore();
-
-	// Make db accessible via store
-	commonStore.setDb(db);
 
 	let paginationPage = $state(1);
 	let search = $state('');
@@ -42,10 +39,6 @@
 		return () => clearTimeout(timeoutId);
 	});
 
-	$effect(() => {
-		projectStore.fetchProjectsFromAPI(db, paginationPage, debouncedSearch);
-	});
-
 	onMount(async () => {
 		// if requestedPath set, redirect to the desired path (in our case we have requestedPath set to invite url)
 		const requestedPath = sessionStorage.getItem('requestedPath');
@@ -53,7 +46,13 @@
 			goto(requestedPath);
 		}
 
-		if (!online.current) {
+		// Get db and make accessible via store
+		db = await data.dbPromise;
+		commonStore.setDb(db);
+
+		if (online.current) {
+			projectStore.fetchProjectsFromAPI(db, paginationPage, debouncedSearch);
+		} else {
 			await projectStore.fetchProjectsFromLocalDB(db);
 		}
 	});
