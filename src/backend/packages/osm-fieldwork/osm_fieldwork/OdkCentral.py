@@ -506,6 +506,65 @@ class OdkForm(OdkCentral):
         except Exception as e:
             log.error(f"Error fetching submissions: {e}")
             return {}
+        
+    def getRepeatData(
+        self,
+        projectId: int,
+        xform: str,
+        repeat_path: str,
+        disk: bool = False,
+        json: bool = True,
+    ):
+        """
+        Fetch repeat group data for a given repeat navigation link path.
+
+        Args:
+            projectId (int): The ID of the project on ODK Central
+            xform (str): The XForm ID or XML form id string
+            repeat_path (str): The OData navigation link for the repeat group
+            disk (bool): Whether to write the downloaded file to disk
+            json (bool): Download JSON or CSV format (usually JSON for repeats)
+
+        Returns:
+            (bytes): The repeat data as JSON or CSV bytes object.
+        """
+        now = datetime.now()
+        timestamp = f"{now.year}_{now.hour}_{now.minute}"
+
+        if json:
+            url = self.base + f"projects/{projectId}/forms/{xform}.svc/" + repeat_path
+            # We don't append anything since repeat_path is full OData navigation URL fragment
+            filespec = f"{xform}_repeat_{timestamp}.json"
+        else:
+            # Typically repeats are only fetched in JSON format, 
+            # but if CSV needed, you might alter the URL accordingly
+            url = self.base + f"projects/{projectId}/forms/{xform}.svc/" + repeat_path
+            filespec = f"{xform}_repeat_{timestamp}.csv"
+
+        # Make sure repeat_path starts with a slash or not? Your URL building should handle that.
+        # E.g., if repeat_path = "/projects/123/forms/abc.svc/Submissions('id')/repeat_group"
+        # then url = self.base + repeat_path
+
+        result = self.session.get(
+            url,
+            headers=dict({"Content-Type": "application/json"}, **self.session.headers),
+            verify=self.verify,
+        )
+
+        if result.status_code == 200:
+            if disk:
+                try:
+                    with open(filespec, "xb") as file:
+                        file.write(result.content)
+                except FileExistsError:
+                    with open(filespec, "wb") as file:
+                        file.write(result.content)
+                log.info(f"Wrote output file {filespec}")
+            return result.content
+        else:
+            log.error(f"Repeat data not found at {url}")
+            return b""
+
 
     def getSubmissions(
         self,
