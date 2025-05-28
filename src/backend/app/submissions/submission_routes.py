@@ -17,7 +17,6 @@
 #
 """Routes associated with data submission to and from ODK Central."""
 
-import json
 from io import BytesIO
 from typing import Annotated, Optional
 
@@ -150,13 +149,10 @@ async def download_submission(
     data = await submission_crud.get_submission_by_project(project, filters)
     submission_json = data.get("value", [])
 
-    submission_geojson = await central_crud.convert_odk_submission_json_to_geojson(
-        submission_json
+    return await central_crud.convert_odk_submission_json_to_geojson(
+        submission_json,
+        project
     )
-    submission_data = BytesIO(json.dumps(submission_geojson).encode("utf-8"))
-
-    headers = {"Content-Disposition": f"attachment; filename={project.slug}.geojson"}
-    return Response(submission_data.getvalue(), headers=headers)
 
 
 # # FIXME 07/06/2024 since osm-fieldwork update
