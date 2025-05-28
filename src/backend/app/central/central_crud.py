@@ -19,6 +19,7 @@
 
 import csv
 import json
+import zipfile
 from asyncio import gather
 from datetime import datetime
 from io import BytesIO, StringIO
@@ -29,6 +30,7 @@ from uuid import UUID, uuid4
 
 import geojson
 from fastapi import HTTPException
+from fastapi.responses import StreamingResponse
 from loguru import logger as log
 from osm_fieldwork.OdkCentral import OdkAppUser, OdkForm, OdkProject
 from osm_fieldwork.update_xlsform import append_field_mapping_fields
@@ -412,7 +414,9 @@ def flatten_json(data: dict, target: dict):
         flatten_json(original_dict, new_dict)
     """
     for k, v in data.items():
-        if isinstance(v, dict):
+        if k=="manual_geopoint":
+            target[k] = v
+        elif isinstance(v, dict):
             if "type" in v and "coordinates" in v:
                 # GeoJSON object found, skip it
                 continue
@@ -423,6 +427,7 @@ def flatten_json(data: dict, target: dict):
 
 async def convert_odk_submission_json_to_geojson(
     input_json: Union[BytesIO, list],
+    project: dict
 ) -> geojson.FeatureCollection:
     """Convert ODK submission JSON file to GeoJSON.
 
@@ -430,6 +435,7 @@ async def convert_odk_submission_json_to_geojson(
 
     Args:
         input_json (BytesIO): ODK JSON submission list.
+        project (dict): Project data, used for naming the output file.
 
     Returns:
         geojson (BytesIO): GeoJSON format ODK submission.
@@ -446,6 +452,7 @@ async def convert_odk_submission_json_to_geojson(
         )
 
     all_features = []
+    manual_geopoints = []
     for submission in submission_json:
         # Remove unnecessary keys
         keys_to_remove = ["meta", "__id", "__system"]
@@ -455,6 +462,33 @@ async def convert_odk_submission_json_to_geojson(
         # Ensure no nesting of the properties (flat struct)
         data = {}
         flatten_json(submission, data)
+
+        try:
+            manual_geopoint = data.pop("manual_geopoint")
+        except (KeyError, IndexError) as e:
+            log.warning(e)
+            manual_geopoint = None
+
+        if manual_geopoint:
+            manual_geopoint_geom = {
+                "type": manual_geopoint["type"],
+                "coordinates": manual_geopoint["coordinates"][
+                    :2
+                ],  # Use only [lon, lat]
+            }
+            # Add manual_geopoint as a separate feature
+            manual_geopoint_feature = geojson.Feature(
+                geometry=manual_geopoint_geom,
+                properties={
+                    "is_manual_geopoint": True,
+                    "description": "Manually placed gate point",
+                    "accuracy": manual_geopoint["properties"]["accuracy"],
+                    "house_id": data["xid"]
+                    if "xid" in data
+                    else None,  # Link to submission
+                },
+            )
+            manual_geopoints.append(manual_geopoint_feature)
 
         # Process primary geometry
         geojson_geom = await javarosa_to_geojson_geom(data.pop("xlocation", {}))
@@ -488,7 +522,26 @@ async def convert_odk_submission_json_to_geojson(
         all_features.append(feature)
         all_features.extend(additional_geometries)
 
-    return geojson.FeatureCollection(features=all_features)
+    manual_geopoint_feature_collection = geojson.FeatureCollection(manual_geopoints)
+    feature_collection = geojson.FeatureCollection(all_features)
+
+    zip_buffer = BytesIO()
+    with zipfile.ZipFile(zip_buffer, "w", zipfile.ZIP_DEFLATED) as zip_file:
+        manual_points_json = json.dumps(manual_geopoint_feature_collection)
+        features_json = json.dumps(feature_collection)
+
+        zip_file.writestr("manual_geopoints.geojson", manual_points_json)
+        zip_file.writestr("features.geojson", features_json)
+
+    zip_buffer.seek(0)
+
+    return StreamingResponse(
+        zip_buffer,
+        media_type="application/zip",
+        headers={
+            "Content-Disposition": f'attachment; filename="{project.slug}.zip"',
+        },
+    )
 
 
 async def feature_geojson_to_entity_dict(

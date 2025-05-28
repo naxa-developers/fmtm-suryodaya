@@ -22,7 +22,7 @@ export const DownloadProjectSubmission = (
         var a = document.createElement('a');
         a.href = window.URL.createObjectURL(response.data);
         // CSV format is actually zipped, so change extension
-        a.download = `${projectName}.${params.file_type === 'csv' ? 'zip' : params.file_type}`;
+        a.download = `${projectName}.${params.file_type === 'csv' || params.file_type === 'geojson'  ? 'zip' : params.file_type}`;
         a.click();
       } catch (error) {
         dispatch(
