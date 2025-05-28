@@ -26,6 +26,7 @@ from typing import Optional
 
 from fastapi import HTTPException, Response
 from loguru import logger as log
+from osm_fieldwork.OdkCentral import OdkForm
 from psycopg import Connection
 from pyodk._endpoints.submissions import Submission
 
@@ -143,6 +144,54 @@ async def get_submission_count_of_a_project(project: DbProject):
     return len(data["value"])
 
 
+async def _inject_repeats(
+        submission: dict, 
+        odk_form: OdkForm, 
+        project:DbProject
+    ) -> dict:
+    """
+    Given one flat submission dict (from listSubmissions or getSubmissions),
+    fetches all its repeat links, pulls in the repeat data, and
+    returns a new dict with the repeat groups injected just before 'meta'.
+    """
+    # find all repeat navigation links
+    repeat_links = {
+        key: submission[key]
+        for key in submission
+        if key.endswith("@odata.navigationLink")
+    }
+    
+    if not repeat_links:
+        return submission.copy()
+    
+    new_sub = {}
+    # collect each repeat group's data
+    repeat_data_blocks = []
+    for repeat_name, repeat_path in repeat_links.items():
+        raw_data = odk_form.getRepeatData(
+            project.odkid,
+            project.odk_form_id,
+            repeat_path
+        )
+        repeat_json = json.loads(raw_data)
+        repeat_group_data = repeat_json.get("value", [])
+
+        # remove the ODK internal key if necessary
+        # repeat_group_data.pop("__Submissions-id", None)
+
+        group_name = repeat_name.replace("@odata.navigationLink", "")
+        repeat_data_blocks.append((group_name, repeat_group_data))
+        submission.pop(repeat_name, None)
+
+    # rebuild the submission dict, injecting repeats before 'meta'
+    for key, val in submission.items():
+        if key == "meta":
+            for group, data in repeat_data_blocks:
+                new_sub[group] = data
+        new_sub[key] = val
+
+    return new_sub
+
 async def get_submission_by_project(
     project: DbProject,
     filters: dict,
@@ -167,12 +216,16 @@ async def get_submission_by_project(
     hashtags = project.hashtags
     xform = get_odk_form(project.odk_credentials)
     data = xform.listSubmissions(project.odkid, project.odk_form_id, filters)
+    raw_list = data.get("value", [])
 
-    def add_hashtags(item):
-        item["hashtags"] = hashtags
-        return item
+    full_submissions = []
+    for item in raw_list:
+        # inject the repeat groups
+        with_repeats = await _inject_repeats(item, xform, project)
+        with_repeats["hashtags"] = hashtags
+        full_submissions.append(with_repeats)
 
-    data["value"] = list(map(add_hashtags, data["value"]))
+    data["value"] = full_submissions
     return data
 
 
@@ -201,8 +254,10 @@ async def get_submission_detail(
             detail="Failed to download submissions",
         )
 
-    submission = json.loads(project_submissions)
-    return submission.get("value", [])[0]
+    submission = (json.loads(project_submissions)).get("value", [])[0]
+    submission_detail = await _inject_repeats(submission, odk_form, project)
+
+    return submission_detail
 
 
 async def create_new_submission(
