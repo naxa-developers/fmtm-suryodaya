@@ -37,6 +37,7 @@ from app.db.enums import HTTPStatus, SubmissionDownloadType
 from app.db.models import DbTask
 from app.projects import project_crud
 from app.submissions import submission_crud, submission_deps, submission_schemas
+from app.submissions.submission_data import _handle_csv_download, _handle_geojson_download, _handle_json_download
 from app.tasks.task_deps import get_task
 
 router = APIRouter(
@@ -136,23 +137,13 @@ async def download_submission(
         }
 
     if file_type == SubmissionDownloadType.JSON:
-        return await submission_crud.download_submission_in_json(project, filters)
+        return await _handle_json_download(project, filters)
 
     elif file_type == SubmissionDownloadType.CSV:
-        file_content = await submission_crud.gather_all_submission_csvs(
-            project, filters
-        )
-        headers = {"Content-Disposition": f"attachment; filename={project.slug}.zip"}
-        return Response(file_content, headers=headers)
-
-    # Else is GeoJSON download
-    data = await submission_crud.get_submission_by_project(project, filters)
-    submission_json = data.get("value", [])
-
-    return await central_crud.convert_odk_submission_json_to_geojson(
-        submission_json,
-        project
-    )
+        return await _handle_csv_download(project, filters)
+    
+    else:
+        return await _handle_geojson_download(project, filters)
 
 
 # # FIXME 07/06/2024 since osm-fieldwork update
