@@ -20,9 +20,15 @@
 from io import BytesIO
 from typing import Annotated, Optional
 
+import csv
+import io
+import os
+import tempfile
+import xml.etree.ElementTree as ET
+import zipfile
 import geojson
-from fastapi import APIRouter, Body, Depends, HTTPException, Query
-from fastapi.responses import JSONResponse, Response
+from fastapi import APIRouter, Body, Depends, HTTPException, Query, File, UploadFile
+from fastapi.responses import JSONResponse, Response, StreamingResponse
 from loguru import logger as log
 from osm_fieldwork.OdkCentralAsync import OdkCentral
 from psycopg import Connection
@@ -518,3 +524,72 @@ async def submission_detail(
         project,
     )
     return submission_detail
+
+
+def flatten_xml(element, parent_path=""):
+    """Flatten an XML element into a dictionary with paths as keys."""
+    items = {}
+    for child in list(element):
+        path = f"{parent_path}/{child.tag}" if parent_path else child.tag
+        if list(child):
+            items.update(flatten_xml(child, path))
+        else:
+            items[path] = child.text
+    return items
+
+
+def extract_flat_data_from_xml(xml_bytes):
+    """Extract flat data from XML bytes."""
+    root = ET.fromstring(xml_bytes)
+    return flatten_xml(root)
+
+
+@router.post("/convert-submission-xml-or-zip-to-csv", response_class=StreamingResponse)
+async def convert_xml_or_zip(file: UploadFile = File(...)):
+    """Convert XML or ZIP file containing XML submissions to CSV.
+
+    This endpoint accepts a single XML file or a ZIP file containing multiple XML files,
+    flattens the XML structure, and returns a CSV file with all submissions.
+    """
+    rows = []
+    all_keys = []
+
+    if file.filename.endswith(".zip"):
+        with tempfile.TemporaryDirectory() as tmpdir:
+            zip_path = os.path.join(tmpdir, file.filename)
+            with open(zip_path, "wb") as f:
+                f.write(await file.read())
+            with zipfile.ZipFile(zip_path, "r") as zip_ref:
+                zip_ref.extractall(tmpdir)
+
+            for root_dir, _, files in os.walk(tmpdir):
+                for name in files:
+                    if name.endswith(".xml"):
+                        with open(os.path.join(root_dir, name), "rb") as f:
+                            flat_data = extract_flat_data_from_xml(f.read())
+                            rows.append(flat_data)
+                            all_keys.extend(flat_data.keys())
+    elif file.filename.endswith(".xml"):
+        contents = await file.read()
+        flat_data = extract_flat_data_from_xml(contents)
+        rows.append(flat_data)
+        all_keys.extend(flat_data.keys())
+    else:
+        return {"error": "Unsupported file type. Please upload .xml or .zip"}
+
+    # Maintain order of first occurrence of fields
+    seen = set()
+    ordered_keys = [x for x in all_keys if not (x in seen or seen.add(x))]
+
+    output = io.StringIO()
+    writer = csv.DictWriter(output, fieldnames=ordered_keys)
+    writer.writeheader()
+    for row in rows:
+        writer.writerow(row)
+
+    output.seek(0)
+    return StreamingResponse(
+        output,
+        media_type="text/csv",
+        headers={"Content-Disposition": "attachment; filename=submissions.csv"},
+    )
